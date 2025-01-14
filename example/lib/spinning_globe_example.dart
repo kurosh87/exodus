@@ -48,8 +48,20 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> with Widgets
 
   void _onMapCreated(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
+    // Disable scale bar
+    mapboxMap.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
+    
     if (!cameras.hasListener) {
       cameras.onListen = () async {
+        await mapboxMap.flyTo(
+          CameraOptions(
+            center: Point(coordinates: Position(0, 0)),
+            zoom: 1.5,
+            bearing: 0,
+            pitch: 0,
+          ),
+          MapAnimationOptions(duration: 0),
+        );
         _spinGlobe(await mapboxMap.getCameraState());
       };
     }
@@ -76,8 +88,8 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> with Widgets
 
   void _spinGlobe(CameraState camera) {
     final secondsPerRev = 120.0;
-    final slowSpinZoom = 3.0;
-    final maxSpinZoom = 5.0;
+    final slowSpinZoom = 1.0;
+    final maxSpinZoom = 2.0;
 
     if (camera.zoom < maxSpinZoom && !cameras.isClosed && !cameras.isPaused) {
       final speedFactor = (maxSpinZoom - max(slowSpinZoom, camera.zoom)) /
@@ -91,6 +103,7 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> with Widgets
             camera.center.coordinates.lat,
           ),
         ),
+        zoom: 1.5,
       );
 
       cameras.add(newCamera);
