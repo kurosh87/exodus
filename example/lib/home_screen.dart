@@ -3,6 +3,45 @@ import 'package:flutter/services.dart';
 import 'package:mapbox_maps_example/spinning_globe_example.dart';
 
 class HomeScreen extends StatelessWidget {
+  final List<DestinationData> destinations = const [
+    DestinationData(
+      country: 'Paraguay',
+      imageUrl: 'https://images.unsplash.com/photo-1585974738771-84483dd9f89f',
+      description: 'Low tax rates & easy residency process',
+      rating: 4.5,
+    ),
+    DestinationData(
+      country: 'Uruguay',
+      imageUrl: 'https://images.unsplash.com/photo-1600623471616-8c1966c91ff6',
+      description: 'Stable economy & high quality of life',
+      rating: 4.7,
+    ),
+    DestinationData(
+      country: 'Mexico',
+      imageUrl: 'https://images.unsplash.com/photo-1518638150340-f706e86654de',
+      description: 'Rich culture & growing tech hub',
+      rating: 4.3,
+    ),
+    DestinationData(
+      country: 'Panama',
+      imageUrl: 'https://images.unsplash.com/photo-1554844344-c34ea04258c4',
+      description: 'Tax benefits & strategic location',
+      rating: 4.4,
+    ),
+    DestinationData(
+      country: 'Costa Rica',
+      imageUrl: 'https://images.unsplash.com/photo-1580094777767-4aa98cfa1c2f',
+      description: 'Beautiful nature & peaceful living',
+      rating: 4.6,
+    ),
+    DestinationData(
+      country: 'Portugal',
+      imageUrl: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b',
+      description: 'EU access & digital nomad friendly',
+      rating: 4.8,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -79,26 +118,149 @@ class HomeScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return ListTile(
-                      leading: const Icon(Icons.location_on_outlined),
-                      title: Text('Location ${index + 1}'),
-                      subtitle: Text('Description for location ${index + 1}'),
-                    );
-                  },
-                  childCount: 50,
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16.0,
+                    crossAxisSpacing: 16.0,
+                    childAspectRatio: 0.85,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _DestinationCard(
+                      destination: destinations[index],
+                    ),
+                    childCount: destinations.length,
+                  ),
                 ),
+              ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100), // Bottom padding
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class DestinationData {
+  final String country;
+  final String imageUrl;
+  final String description;
+  final double rating;
+
+  const DestinationData({
+    required this.country,
+    required this.imageUrl,
+    required this.description,
+    required this.rating,
+  });
+}
+
+class _DestinationCard extends StatelessWidget {
+  final DestinationData destination;
+
+  const _DestinationCard({
+    required this.destination,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          // TODO: Navigate to country detail page
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Image.network(
+                '${destination.imageUrl}?auto=format&fit=crop&w=400&q=80',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    child: Center(
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          destination.country,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            destination.rating.toString(),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    destination.description,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 } 

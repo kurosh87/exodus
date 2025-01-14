@@ -1,142 +1,162 @@
 import 'package:flutter/material.dart';
-import 'developer_screen.dart';
-import 'example.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final List<Example> mapExamples;
-  final bool isDarkMode;
-  final Function() onThemeToggle;
+  const SettingsScreen({Key? key}) : super(key: key);
 
-  const SettingsScreen({
-    Key? key, 
-    required this.mapExamples,
-    required this.isDarkMode,
-    required this.onThemeToggle,
-  }) : super(key: key);
+  void _handleThemeChange(BuildContext context, bool value) {
+    // TODO: Implement theme change
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 60.0),
-      child: ListView(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Settings',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            title: 'Account',
-            items: [
-              SettingsItem(
-                icon: Icons.person_outline,
-                title: 'Profile',
-                onTap: () {},
-              ),
-              SettingsItem(
-                icon: Icons.notifications_outlined,
-                title: 'Notifications',
-                onTap: () {},
-              ),
-            ],
-          ),
-          _buildSection(
-            title: 'App Settings',
-            items: [
-              SettingsItem(
-                icon: Icons.language,
-                title: 'Language',
-                onTap: () {},
-              ),
-              SettingsItem(
-                icon: Icons.dark_mode_outlined,
-                title: 'Dark Mode',
-                trailing: Switch(
-                  value: isDarkMode,
-                  onChanged: (_) => onThemeToggle(),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return CustomScrollView(
+      slivers: [
+        const SliverAppBar.large(
+          title: Text('Settings'),
+          floating: true,
+          pinned: true,
+        ),
+        SliverList(
+          delegate: SliverChildListDelegate([
+            _buildSection(
+              context,
+              'Account',
+              [
+                _SettingsItem(
+                  icon: Icons.person_outline,
+                  title: 'Profile',
+                  onTap: () {
+                    // TODO: Navigate to profile
+                  },
                 ),
-                onTap: onThemeToggle,
-              ),
-            ],
-          ),
-          _buildSection(
-            title: 'Support',
-            items: [
-              SettingsItem(
-                icon: Icons.help_outline,
-                title: 'Help Center',
-                onTap: () {},
-              ),
-              SettingsItem(
-                icon: Icons.bug_report_outlined,
-                title: 'Developer Options',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DeveloperScreen(mapExamples: mapExamples),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
+                _SettingsItem(
+                  icon: Icons.notifications_outlined,
+                  title: 'Notifications',
+                  onTap: () {
+                    // TODO: Navigate to notifications
+                  },
+                ),
+                _SettingsItem(
+                  icon: Icons.language_outlined,
+                  title: 'Language',
+                  subtitle: 'English',
+                  onTap: () {
+                    // TODO: Show language picker
+                  },
+                ),
+              ],
+            ),
+            _buildSection(
+              context,
+              'App Settings',
+              [
+                _SettingsItem(
+                  icon: Icons.dark_mode_outlined,
+                  title: 'Dark Mode',
+                  trailing: Switch(
+                    value: isDarkMode,
+                    onChanged: (value) => _handleThemeChange(context, value),
+                  ),
+                  onTap: () => _handleThemeChange(context, !isDarkMode),
+                ),
+                _SettingsItem(
+                  icon: Icons.location_on_outlined,
+                  title: 'Location Services',
+                  onTap: () {
+                    // TODO: Navigate to location settings
+                  },
+                ),
+                _SettingsItem(
+                  icon: Icons.security_outlined,
+                  title: 'Privacy & Security',
+                  onTap: () {
+                    // TODO: Navigate to privacy settings
+                  },
+                ),
+              ],
+            ),
+            _buildSection(
+              context,
+              'Support',
+              [
+                _SettingsItem(
+                  icon: Icons.help_outline,
+                  title: 'Help Center',
+                  onTap: () {
+                    // TODO: Navigate to help center
+                  },
+                ),
+                _SettingsItem(
+                  icon: Icons.info_outline,
+                  title: 'About',
+                  onTap: () {
+                    // TODO: Show about dialog
+                  },
+                ),
+                _SettingsItem(
+                  icon: Icons.logout,
+                  title: 'Sign Out',
+                  textColor: Theme.of(context).colorScheme.error,
+                  onTap: () {
+                    // TODO: Handle sign out
+                  },
+                ),
+              ],
+            ),
+          ]),
+        ),
+      ],
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required List<SettingsItem> items,
-  }) {
+  Widget _buildSection(BuildContext context, String title, List<Widget> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey,
-            ),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
         ...items,
-        const SizedBox(height: 16),
       ],
     );
   }
 }
 
-class SettingsItem extends StatelessWidget {
+class _SettingsItem extends StatelessWidget {
   final IconData icon;
   final String title;
-  final VoidCallback onTap;
+  final String? subtitle;
   final Widget? trailing;
+  final Color? textColor;
+  final VoidCallback onTap;
 
-  const SettingsItem({
-    Key? key,
+  const _SettingsItem({
     required this.icon,
     required this.title,
-    required this.onTap,
+    this.subtitle,
     this.trailing,
-  }) : super(key: key);
+    this.textColor,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon),
-      title: Text(title),
-      trailing: trailing ?? const Icon(Icons.chevron_right),
+      title: Text(
+        title,
+        style: textColor != null
+            ? TextStyle(color: textColor)
+            : null,
+      ),
+      subtitle: subtitle != null ? Text(subtitle!) : null,
+      trailing: trailing,
       onTap: onTap,
     );
   }
