@@ -98,11 +98,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutExpo,
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
                 spreadRadius: 1,
                 blurRadius: 10,
                 offset: const Offset(0, -5),
@@ -121,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

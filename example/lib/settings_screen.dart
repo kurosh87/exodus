@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'theme_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   void _handleThemeChange(BuildContext context, bool value) {
-    // TODO: Implement theme change
+    Provider.of<ThemeProvider>(context, listen: false).setThemeMode(
+      value ? ThemeMode.dark : ThemeMode.light,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
 
     return CustomScrollView(
       slivers: [

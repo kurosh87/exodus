@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'theme_provider.dart';
 import 'home_screen.dart';
 import 'services_screen.dart';
 import 'community_screen.dart';
@@ -12,7 +14,12 @@ void main() {
   final accessToken = const String.fromEnvironment("ACCESS_TOKEN",
       defaultValue: 'pk.eyJ1IjoicmVhbGVzdGF0ZWJvdCIsImEiOiJjbTMzM2d5dWoxOXhlMmlzNG01YmgwY2x1In0.yv0Nac7EjmWZvjg40KS6nw');
   MapboxOptions.setAccessToken(accessToken);
-  runApp(const ExodusApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const ExodusApp(),
+    ),
+  );
 }
 
 class ExodusApp extends StatelessWidget {
@@ -20,20 +27,25 @@ class ExodusApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Exodus',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF1E88E5),
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF1E88E5),
-        brightness: Brightness.dark,
-      ),
-      home: const MainScreen(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        return MaterialApp(
+          title: 'Exodus',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.themeMode,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: Colors.green,
+            brightness: Brightness.light,
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: Colors.green,
+            brightness: Brightness.dark,
+          ),
+          home: const MainScreen(),
+        );
+      },
     );
   }
 }
