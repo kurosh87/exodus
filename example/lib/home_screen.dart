@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mapbox_maps_example/spinning_globe_example.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
-class HomeScreen extends StatelessWidget {
-  final List<DestinationData> destinations = const [
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  final _globeKey = GlobalKey<SpinningGlobeExampleState>();
+
+  static const List<DestinationData> destinations = [
     DestinationData(
       country: 'Paraguay',
       imageUrl: 'https://images.unsplash.com/photo-1585974738771-84483dd9f89f',
@@ -44,6 +57,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -51,7 +65,18 @@ class HomeScreen extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
-            SpinningGlobeExample(),
+            VisibilityDetector(
+              key: const Key('globe_detector'),
+              onVisibilityChanged: (info) {
+                if (info.visibleFraction == 1) {
+                  _globeKey.currentState?.mapboxMap.setGestureInProgress(true);
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    _globeKey.currentState?.mapboxMap.setGestureInProgress(false);
+                  });
+                }
+              },
+              child: SpinningGlobeExample(key: _globeKey),
+            ),
             _buildBottomSheet(context),
           ],
         ),

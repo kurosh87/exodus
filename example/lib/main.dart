@@ -58,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
           IndexedStack(
             index: _selectedIndex,
             children: [
-              HomeScreen(),
+              const HomeScreen(),
               const ServicesScreen(),
               const CommunityScreen(),
               SettingsScreen(),

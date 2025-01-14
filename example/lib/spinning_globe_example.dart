@@ -6,6 +6,8 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:mapbox_maps_example/main.dart';
 
 class SpinningGlobeExample extends StatefulWidget implements Example {
+  const SpinningGlobeExample({Key? key}) : super(key: key);
+
   @override
   final Widget leading = const Icon(Icons.threesixty_outlined);
   @override
@@ -17,7 +19,7 @@ class SpinningGlobeExample extends StatefulWidget implements Example {
   State<StatefulWidget> createState() => SpinningGlobeExampleState();
 }
 
-class SpinningGlobeExampleState extends State<SpinningGlobeExample> {
+class SpinningGlobeExampleState extends State<SpinningGlobeExample> with WidgetsBindingObserver {
   late final MapboxMap mapboxMap;
   late final StreamController<CameraOptions> cameras;
   StreamSubscription? subscription;
@@ -27,6 +29,21 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> {
   void initState() {
     super.initState();
     cameras = StreamController<CameraOptions>();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _resumeSpinning();
+    }
+  }
+
+  void _resumeSpinning() async {
+    if (!cameras.hasListener) {
+      final cameraState = await mapboxMap.getCameraState();
+      _spinGlobe(cameraState);
+    }
   }
 
   void _onMapCreated(MapboxMap mapboxMap) {
@@ -82,6 +99,7 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     subscription?.cancel();
     cameras.close();
     super.dispose();
