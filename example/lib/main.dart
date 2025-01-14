@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mapbox_maps_example/animated_route_example.dart';
 import 'package:mapbox_maps_example/animation_example.dart';
 import 'package:mapbox_maps_example/camera_example.dart';
@@ -31,6 +32,7 @@ import 'style_example.dart';
 import 'gestures_example.dart';
 import 'debug_options_example.dart';
 import 'home_screen.dart';
+import 'settings_screen.dart';
 
 final List<Example> _allPages = <Example>[
   SimpleMapExample(),
@@ -72,10 +74,17 @@ class MapsDemo extends StatefulWidget {
 
 class _MapsDemoState extends State<MapsDemo> {
   int _selectedIndex = 0;
+  bool _isDarkMode = false;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  void toggleTheme() {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
     });
   }
 
@@ -90,24 +99,41 @@ class _MapsDemoState extends State<MapsDemo> {
   Widget _buildExamplesContent() {
     return MapsDemo.ACCESS_TOKEN.isEmpty || MapsDemo.ACCESS_TOKEN.contains("YOUR_TOKEN")
         ? buildAccessTokenWarning()
-        : ListView.separated(
-            itemCount: _allPages.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (_, int index) {
-              final example = _allPages[index];
-              return ListTile(
-                leading: example.leading,
-                title: Text(example.title),
-                subtitle: (example.subtitle?.isNotEmpty == true)
-                    ? Text(
-                        example.subtitle!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : null,
-                onTap: () => _pushPage(context, _allPages[index]),
-              );
-            },
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Developer Reference',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: _allPages.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (_, int index) {
+                    final example = _allPages[index];
+                    return ListTile(
+                      leading: example.leading,
+                      title: Text(example.title),
+                      subtitle: (example.subtitle?.isNotEmpty == true)
+                          ? Text(
+                              example.subtitle!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                          : null,
+                      onTap: () => _pushPage(context, _allPages[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
   }
 
@@ -116,11 +142,15 @@ class _MapsDemoState extends State<MapsDemo> {
       case 0:
         return HomeScreen();
       case 1:
-        return _buildExamplesContent();
+        return Center(child: Text('Examples'));
       case 2:
         return Center(child: Text('Favorites'));
       case 3:
-        return Center(child: Text('Settings'));
+        return SettingsScreen(
+          mapExamples: _allPages,
+          isDarkMode: _isDarkMode,
+          onThemeToggle: toggleTheme,
+        );
       default:
         return HomeScreen();
     }
@@ -128,43 +158,53 @@ class _MapsDemoState extends State<MapsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          _buildBody(),
-          Positioned(
-            top: 60,
-            left: 16,
-            child: SvgPicture.asset(
-              'assets/images/exodus_logo.svg',
-              height: 30,
-            ),
-          ),
-        ],
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.green,
+        brightness: _isDarkMode ? Brightness.dark : Brightness.light,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Examples',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        onTap: _onItemTapped,
+      home: Scaffold(
+        body: Stack(
+          children: [
+            _buildBody(),
+            if (_selectedIndex == 0)
+              Positioned(
+                top: 60,
+                left: 16,
+                child: SvgPicture.asset(
+                  'assets/images/exodus_logo.svg',
+                  height: 30,
+                  color: _isDarkMode ? Colors.white : null,
+                ),
+              ),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              label: 'Examples',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favorites',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Theme.of(context).colorScheme.primary,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }
@@ -200,13 +240,5 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   MapboxOptions.setAccessToken(MapsDemo.ACCESS_TOKEN);
   
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: MapsDemo(),
-    theme: ThemeData(
-      useMaterial3: true,
-      colorSchemeSeed: Colors.green,
-      brightness: Brightness.light,
-    ),
-  ));
+  runApp(MapsDemo());
 }

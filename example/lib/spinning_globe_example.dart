@@ -23,13 +23,19 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> {
   late final StreamSubscription subscription;
   var isSpinning = true;
 
+  @override
+  void initState() {
+    super.initState();
+    cameras = StreamController<CameraOptions>();
+  }
+
   void _onMapCreated(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    cameras = StreamController(
-      onListen: () async {
+    if (!cameras.hasListener) {
+      cameras.onListen = () async {
         _spinGlobe(await mapboxMap.getCameraState());
-      },
-    );
+      };
+    }
   }
 
   void _onStyleLoaded(_) {
