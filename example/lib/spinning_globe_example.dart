@@ -20,7 +20,7 @@ class SpinningGlobeExample extends StatefulWidget implements Example {
 class SpinningGlobeExampleState extends State<SpinningGlobeExample> {
   late final MapboxMap mapboxMap;
   late final StreamController<CameraOptions> cameras;
-  late final StreamSubscription subscription;
+  StreamSubscription? subscription;
   var isSpinning = true;
 
   @override
@@ -54,22 +54,6 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> {
           _spinGlobe(data.cameraState);
         },
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: FloatingActionButton(
-          onPressed: () async {
-            setState(() {
-              isSpinning = !isSpinning;
-              if (!isSpinning) {
-                subscription.pause();
-              } else {
-                subscription.resume();
-              }
-            });
-          },
-          child: Icon(isSpinning ? Icons.pause : Icons.play_arrow),
-        ),
-      ),
     );
   }
 
@@ -98,7 +82,7 @@ class SpinningGlobeExampleState extends State<SpinningGlobeExample> {
 
   @override
   void dispose() {
-    subscription.cancel();
+    subscription?.cancel();
     cameras.close();
     super.dispose();
   }
